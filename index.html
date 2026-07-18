@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leon's Trip Planner</title>
+  <style>
+    :root {
+      --bg: #f7f6f2;
+      --surface: #ffffff;
+      --surface-2: #f3f2ee;
+      --border: #dcd9d3;
+      --text: #222;
+      --text-muted: #666;
+      --primary: #01696f;
+      --primary-hover: #014f53;
+      --radius: 10px;
+      --shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    [data-theme="dark"] {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --surface-2: #252525;
+      --border: #333;
+      --text: #eee;
+      --text-muted: #aaa;
+      --primary: #4f98a3;
+      --primary-hover: #2f7f8b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    button, input, select, textarea { font: inherit; color: inherit; }
+    .app { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+    }
+    .brand { font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+    .btn:hover { filter: brightness(0.95); }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: transparent;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    h1, h2, h3 { margin: 0 0 10px; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.2rem; }
+    .muted { color: var(--text-muted); }
+    .grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    form { display: grid; gap: 10px; }
+    .field { display: grid; gap: 4px; }
+    label { font-size: 0.9rem; font-weight: 600; }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    textarea { min-height: 80px; resize: vertical; }
+    .list { display: grid; gap: 10px; }
+    .trip-card, .item-card, .rest-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+    .trip-card.active {
+      outline: 2px solid var(--primary);
+    }
+    .trip-head, .item-head {
+      display: flex; justify-content: space-between; gap: 8px; align-items: start; flex-wrap: wrap;
+    }
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px;
+      background: color-mix(in srgb, var(--primary) 15%, var(--surface-2));
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .empty {
+      padding: 24px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .reorder-btns {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .reorder-btns button {
+      min-width: 28px; min-height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+    }
+    .share-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .share-row {
+      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+    }
+    .share-row input {
+      flex: 1; min-height: 36px; font-size: 0.9rem;
+    }
+    .photo-strip {
+      display: flex; gap: 6px; overflow-x: auto; margin-top: 6px;
+    }
+    .photo-strip img {
+      height: 100px; width: 160px; object-fit: cover;
+      border-radius: 8px; flex-shrink: 0;
+    }
+    .summary-card {
+      background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 10%, var(--surface)), var(--surface));
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 11l18-8-8 18-2-8-8-2z"></path>
+      </svg>
+      <div>Leon's Trip Planner</div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="themeToggle">Theme</button>
+      <button class="btn" id="exportAll">Export</button>
+      <label class="btn" for="importFile">Import</label>
+      <input id="importFile" type="file" accept="application/json" hidden>
+    </div>
+  </header>
+
+  <div class="panel">
+    <h1>Build trips, track stops, and keep restaurant notes in one place.</h1>
+    <p class="muted">Create a trip, add itinerary items and restaurants, share a link so friends can edit the same trip, and reorder items with up/down buttons.</p>
+    <div class="toolbar">
+      <button class="btn btn-primary" id="newTripBtn">Create trip</button>
+      <button class="btn" id="downloadTripBtn">Download trip snapshot</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <aside>
+      <div class="panel">
+        <h2>Trips</h2>
+        <div class="tiny muted" style="margin-bottom:8px;">Choose one active trip</div>
+        <div id="tripList" class="list"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Create trip</h2>
+        <form id="tripForm">
+          <div class="field">
+            <label for="tripName">Trip name</label>
+            <input id="tripName" required placeholder="Tokyo Autumn Trip">
+          </div>
+          <div class="field">
+            <label for="tripLocation">Main location</label>
+            <input id="tripLocation" placeholder="Tokyo">
+          </div>
+          <div class="two-col">
+            <div class="field">
+              <label for="tripStart">Start date</label>
+              <input id="tripStart" type="date">
+            </div>
+            <div class="field">
+              <label for="tripEnd">End date</label>
+              <input id="tripEnd" type="date">
+            </div>
+          </div>
+          <div class="field">
+            <label for="tripNotes">Notes</label>
+            <textarea id="tripNotes" placeholder="Flights, hotels, budget, reminders"></textarea>
+          </div>
+          <div class="field">
+            <label for="tripPhotos">Trip photos (multiple)</label>
+            <input id="tripPhotos" type="file" accept="image/*" multiple>
+            <input id="tripPhotoData" type="hidden">
+            <div id="tripPhotoPreview" class="photo-strip"></div>
+          </div>
+          <button class="btn btn-primary" type="submit">Save trip</button>
+        </form>
+      </div>
+    </aside>
+
+    <section>
+      <div class="panel">
+        <div class="summary-card" id="summaryCard">
+          <div class="tiny muted">Selected trip</div>
+          <h2 id="summaryTitle">No trip selected</h2>
+          <p class="muted" id="summaryMeta">Create or select a trip to begin planning.</p>
+          <div class="badges" id="summaryBadges"></div>
+          <div id="summaryPhotoStrip" class="photo-strip"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:end;gap:10px;margin-bottom:10px;">
+          <div>
+            <h2>Itinerary</h2>
+            <div class="tiny muted">Place, time, travel duration, and photo</div>
+          </div>
+        </div>
+        <form id="itineraryForm">
+          <div class="two-col">
+            <div class="field">
+              <label for="itemDay">Day / date</label>
+              <input id="itemDay" placeholder="Day 1 or 2026-11-02" required>
+            </div>
+            <div class="field">
+              <label for="itemTime">Time</label>
+              <input id="itemTime" type="time">
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="field">
+              <label for="itemPlace">Location / place</label>
+              <input id="itemPlace" placeholder="Senso-ji Temple" required>
+            </div>
+            <div class="field">
+              <label for="itemTravel">Travel from previous (min)</label>
+              <input id="itemTravel" type="number" min="0" placeholder="15">
+            </div>
+          </div>
+          <div class="field">
+            <label for="itemPhoto">Item photo (optional)</label>
+            <input id="itemPhoto" type="file" accept="image/*">
+            <input id="itemPhotoData" type="hidden">
+            <div id="itemPhotoPreview" class="photo-strip"></div>
+          </div>
+          <div class="field">
+            <label for="itemNotes">Notes</label>
+            <textarea id="itemNotes" placeholder="Tickets, tips, must-see spots"></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Add itinerary item</button>
+        </form>
+
+        <div id="itineraryList" class="list" style="margin-top:16px;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-header" style="display:flex;justify-content:space-between;align-items:end;gap:10px;margin-bottom:10px;">
+          <div>
+            <h2>Restaurants</h2>
+            <div class="tiny muted">Save places to eat with notes and photos</div>
+          </div>
+        </div>
+        <form id="restaurantForm">
+          <div class="two-col">
+            <div class="field">
+              <label for="restName">Restaurant name</label>
+              <input id="restName" required placeholder="Sushi Dai">
+            </div>
+            <div class="field">
+              <label for="restArea">Area / neighborhood</label>
+              <input id="restArea" placeholder="Tsukiji">
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="field">
+              <label for="restPrice">Price level</label>
+              <select id="restPrice">
+                <option value="$">$</option>
+                <option value="$$">$$</option>
+                <option value="$$$">$$$</option>
+                <option value="$$$$">$$$$</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="restDay">Best day / time</label>
+              <input id="restDay" placeholder="Day 2 lunch">
+            </div>
+          </div>
+          <div class="field">
+            <label for="restPhoto">Photo (optional)</label>
+            <input id="restPhoto" type="file" accept="image/*">
+            <input id="restPhotoData" type="hidden">
+            <div id="restPhotoPreview" class="photo-strip"></div>
+          </div>
+          <div class="field">
+            <label for="restNotes">Notes</label>
+            <textarea id="restNotes" placeholder="Om惊醒
+</parameter>
+</function>
+</tool_call>
